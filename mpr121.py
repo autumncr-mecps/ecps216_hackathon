@@ -30,7 +30,7 @@ def calibrate():
     # baseline data changes fairly quickly
     # not actually sure if this is better than using that
     calibration = get_baseline_data()
-    n = 0;
+    n = 0
     start = time.time()
     # run calibration routine for two seconds
     while (time.time() - start) < 2:
@@ -40,8 +40,9 @@ def calibrate():
             ca = calibration[i]
             ca = ca + ((new_data[i] - ca) / (n + 1))
             calibration[i] = ca
-        n++
+        n += 1
         time.sleep(0.05)
-    
+
+    print("Calibration complete")
     return calibration
 
