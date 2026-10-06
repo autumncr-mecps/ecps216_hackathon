@@ -25,3 +25,23 @@ def get_baseline_data():
     for i in range(num_pins):
         baseline[i] = get_baseline(i)
     return baseline
+
+def calibrate():
+    # baseline data changes fairly quickly
+    # not actually sure if this is better than using that
+    calibration = get_baseline_data()
+    n = 0;
+    start = time.time()
+    # run calibration routine for two seconds
+    while (time.time() - start) < 2:
+        new_data = get_baseline_data()
+        # cumulative average over two seconds
+        for i in range(num_pins):
+            ca = calibration[i]
+            ca = ca + ((new_data[i] - ca) / (n + 1))
+            calibration[i] = ca
+        n++
+        time.sleep(0.05)
+    
+    return calibration
+
