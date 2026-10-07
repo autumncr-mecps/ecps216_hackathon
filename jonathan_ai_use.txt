@@ -1,0 +1,130 @@
+You: how would I create a function that when an email is entered and it can be an array of emails (meaning multiple) in python for a raspberry pi
+AI: Here's a well-structured Python function that handles both a **single email** or a **list of emails**, perfect for use on a Raspberry Pi:
+
+---
+
+## 📧 Email Input Function (Single or Multiple)
+
+### Step 1 — Basic Structure
+
+```python
+import re
+
+def process_emails(emails):
+    """
+    Accepts a single email (string) or multiple emails (list of strings).
+    Validates and returns a clean list of valid emails.
+    
+    Args:
+        emails (str or list): A single email string or a list of email strings.
+    
+    Returns:
+        list: A list of valid email addresses.
+    """
+
+    # --- Normalize input: always work with a list ---
+    if isinstance(emails, str):
+        emails = [emails]  # Wrap single email in a list
+    elif not isinstance(emails, list):
+        raise TypeError("Input must be a string or a list of strings.")
+
+    # --- Email validation pattern ---
+    email_pattern = re.compile(r'^[\w\.-]+@[\w\.-]+\.\w{2,}$')
+
+    valid_emails = []
+    invalid_emails = []
+
+    for email in emails:
+        email = email.strip().lower()  # Clean up whitespace and normalize case
+        if email_pattern.match(email):
+            valid_emails.append(email)
+        else:
+            invalid_emails.append(email)
+
+    # --- Report results ---
+    if invalid_emails:
+        print(f"⚠️  Invalid email(s) skipped: {invalid_emails}")
+
+    print(f"✅ Valid email(s): {valid_emails}")
+    return valid_emails
+```
+
+---
+
+### Step 2 — Usage Examples
+
+```python
+# Single email (string)
+process_emails("peter.anteater@uci.edu")
+
+# Multiple emails (list)
+process_emails(["peter.anteater@uci.edu", "zot@uci.edu", "bad-email", "test@domain.com"])
+
+# Edge case: accidental whitespace
+process_emails(["  hello@uci.edu  ", "world@uci.edu"])
+```
+
+---
+
+### Step 3 — Example Output
+
+```
+✅ Valid email(s): ['peter.anteater@uci.edu']
+
+⚠️  Invalid email(s) skipped: ['bad-email']
+✅ Valid email(s): ['peter.anteater@uci.edu', 'zot@uci.edu', 'test@domain.com']
+
+✅ Valid email(s): ['hello@uci.edu', 'world@uci.edu']
+```
+
+---
+
+### Step 4 — (Optional) Sending Emails on Raspberry Pi
+
+If you want to **send emails** after processing, you can use Python's built-in `smtplib`:
+
+```python
+import smtplib
+from email.mime.text import MIMEText
+
+def send_email(recipients, subject, body, sender, password):
+    """
+    Sends an email to one or multiple recipients.
+    """
+    recipients = process_emails(recipients)  # Validate first!
+
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = ", ".join(recipients)  # Join multiple emails
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        server.login(sender, password)
+        server.sendmail(sender, recipients, msg.as_string())
+        print(f"📨 Email sent to: {recipients}")
+
+# Example usage
+send_email(
+    recipients=["peter@uci.edu", "zot@uci.edu"],
+    subject="Hello from Raspberry Pi!",
+    body="This was sent from my Pi!",
+    sender="your_email@gmail.com",
+    password="your_app_password"
+)
+```
+
+---
+
+## 🔑 Key Concepts Used
+
+| Concept | Purpose |
+|---|---|
+| `isinstance(emails, str)` | Detects if input is a single string |
+| `isinstance(emails, list)` | Detects if input is already a list |
+| `re.compile(...)` | Validates email format using regex |
+| `.strip().lower()` | Cleans and normalizes each email |
+| `smtplib` | Built-in Python library to send emails |
+
+> 💡 **Raspberry Pi Tip:** If using Gmail's SMTP, make sure to generate an **App Password** in your Google Account settings instead of using your regular password, as Google blocks less secure app access.
+
+Let me know if you'd like to extend this further, such as reading emails from a file or sending sensor data via email from your Pi! 🍓
