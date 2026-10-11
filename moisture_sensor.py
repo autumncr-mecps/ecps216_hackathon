@@ -1,4 +1,5 @@
 # mock
+# python library: https://pypi.org/project/dht11/
 
 import enum
 
